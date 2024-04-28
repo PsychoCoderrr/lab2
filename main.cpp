@@ -620,7 +620,7 @@ public:
     }
 };
 
-void Test_DynamicArray_Constructors()
+void TestDynamicArrayConstructors()
 {
     int a[] = { 1, 2, 3, 4, 5, 6 };
 
@@ -640,7 +640,7 @@ void Test_DynamicArray_Constructors()
     }
 }
 
-void Test_DynamicArray_Set()
+void TestDynamicArraySet()
 {
     int a[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
     DynamicArray<int> test(a, 8);
@@ -654,40 +654,24 @@ void Test_DynamicArray_Set()
     assert(test[3] == 10);
 }
 
-void Test_LinkedList_Constructors()
+void TestLinkedListConstructors()
 {
     int a[] = { 1, 2, 3, 4, 5, 6 };
 
-    LinkedList<int> test2(a, 6);
-    assert(test2.GetLength() == 6);
+    LinkedList<int> test1(a, 6);
+    assert(test1.GetLength() == 6);
+    for (int i = 0; i < test1.GetLength(); i++) {
+        assert(test1.Get(i) == a[i]);
+    }
+
+    LinkedList<int> test2(test1);
+    assert(test2.GetLength() == test1.GetLength());
     for (int i = 0; i < test2.GetLength(); i++) {
-        assert(test2.Get(i) == a[i]);
-    }
-
-    LinkedList<int> test4(test2);
-    assert(test4.GetLength() == test2.GetLength());
-    for (int i = 0; i < test4.GetLength(); i++) {
-        assert(test2.Get(i) == test4.Get(i));
+        assert(test1.Get(i) == test2.Get(i));
     }
 }
 
-void Test_LinkedList_Insert()
-{
-    int a[] = { 1, 2, 3, 4, 5, 6 };
-    LinkedList<int> test5(a, 6);
-    test5.InsertAt(12, 3);
-    assert(test5[3] == 12);
-}
-
-void Test_LinkedList_Append()
-{
-    int a[] = { 1, 2, 3, 4, 5, 6 };
-    LinkedList<int> test10(a, 6);
-    test10.Append(10);
-    assert(test10.GetLast() == 10);
-}
-
-void Test_LinkedList_SubList()
+void TestLinkedListSubList()
 {
     int a[] = { 1, 2, 3, 4, 5, 6 };
     int b[] = { 3, 4, 5 };
@@ -698,7 +682,7 @@ void Test_LinkedList_SubList()
     }
 }
 
-void Test_LinkedList_Concat()
+void TestLinkedListConcat()
 {
     int b[] = { 1, 2, 3 };
     int c[] = { 4, 5, 6 };
@@ -712,16 +696,22 @@ void Test_LinkedList_Concat()
     }
 }
 
-void Test_LinkedList_Prepend()
-{
-    int a[] = { 1, 2, 3, 4, 5, 6 };
-    LinkedList<int> test10(a, 6);
-    test10.Prepend(10);
-    assert(test10.GetFirst() == 10);
-}
-
 void TestLinkedListInput()
 {
+    int a[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    LinkedList<int> test1(a, 8);
+    test1.Append(10);
+    assert(test1.GetLast() == 10);
+
+    int b[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    LinkedList<int> test3(b, 8);
+    test3.Prepend(10);
+    assert(test3.GetFirst() == 10);
+
+    int c[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    LinkedList<int> test2(c, 8);
+    test2.InsertAt(10, 3);
+    assert(test2[3] == 10);
 }
 
 int main(int argc, const char* argv[])
@@ -729,59 +719,33 @@ int main(int argc, const char* argv[])
     int status = 0;
     std::cout << "0. Run tests for DynamicArray\n";
     std::cout << "1. Run tests for LinkedList\n";
-    std::cout << "2. Добавить элемент в вектор целых чисел\n";
-    std::cout << "3. Добавить элемент в вектор комплексных чисел\n";
-    std::cout << "4. Суммировать векторы\n";
-    std::cout << "5. Произведение векторов\n";
-    std::cout << "6. Показать вектор по имени\n";
-    std::cout << "7. Остановить программу\n";
+    std::cout << "3. Остановить программу\n";
 
     int flag = 1;
     while (flag) {
         std::cin >> status;
         switch (status) {
         case 0:
-            Test_DynamicArray_Constructors();
-            Test_DynamicArray_Set();
+            TestDynamicArrayConstructors();
+            TestDynamicArraySet();
             std::cout << "Tests for DynamicArray passed\n";
             break;
         case 1:
-            Test_LinkedList_Constructors();
-            Test_LinkedList_Append();
-            Test_LinkedList_SubList();
-            Test_LinkedList_Prepend();
-            Test_LinkedList_Insert();
-            Test_LinkedList_Concat();
+            TestLinkedListConstructors();
+            TestLinkedListInput();
+            TestLinkedListSubList();
+            TestLinkedListConcat();
             std::cout << "Tests for LinkedList passed\n";
             break;
-
-        case 2:
-
         case 3:
-
-        case 4:
-
-        case 7:
             flag = 0;
             break;
-
         default:
             fprintf(stderr, "Неизвестная команда\n");
         }
         std::cout << "0. Run tests for DynamicArray\n";
         std::cout << "1. Run tests for LinkedList\n";
-        std::cout << "2. Добавить элемент в вектор целых чисел\n";
-        std::cout << "3. Добавить элемент в вектор комплексных чисел\n";
-        std::cout << "4. Суммировать векторы\n";
-        std::cout << "5. Произведение векторов\n";
-        std::cout << "6. Показать вектор по имени\n";
-        std::cout << "7. Остановить программу\n";
+        std::cout << "3. Остановить программу\n";
     }
-    Test_LinkedList_Constructors();
-    Test_LinkedList_Append();
-    Test_LinkedList_SubList();
-    Test_LinkedList_Prepend();
-    Test_LinkedList_Insert();
-    Test_LinkedList_Concat();
     return 0;
 }
