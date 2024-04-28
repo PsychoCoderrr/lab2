@@ -245,9 +245,11 @@ public:
         MutableArraySequence<T>* intermediateResult = new MutableArraySequence<T>(this->GetLength() + list.GetLength());
         for (int i = 0; i < this->GetLength(); i++) {
             intermediateResult->InsertAt(this->Get(i), i);
+            intermediateResult->array->Resize(intermediateResult->GetLength() - 1);
         }
         for (int i = 0; i < list.GetLength(); i++) {
             intermediateResult->InsertAt(list.Get(i), this->GetLength() + i);
+            intermediateResult->array->Resize(intermediateResult->GetLength() - 1);
         }
         return intermediateResult;
     }
@@ -256,7 +258,8 @@ public:
     {
         MutableArraySequence<T>* intermediateResult = new MutableArraySequence(endIndex - startIndex + 1);
         for (int i = 0; i < endIndex - startIndex + 1; i++) {
-            intermediateResult->InsertAt(this->Get(startIndex + i), i);
+            intermediateResult->InsertAt(this->Get(startIndex + i - 1), i);
+            intermediateResult->array->Resize(intermediateResult->GetLength() - 1);
         }
         return intermediateResult;
     }
@@ -703,20 +706,6 @@ void TestLinkedListSubList()
     }
 }
 
-void TestLinkedListConcat()
-{
-    int b[] = { 1, 2, 3 };
-    int c[] = { 4, 5, 6 };
-    int bc[] = { 1, 2, 3, 4, 5, 6 };
-    LinkedList<int> test6(b, 3);
-    LinkedList<int> test7(c, 3);
-    LinkedList<int>* test8 = test6.Concat(test7);
-    assert(test8->GetLength() == test6.GetLength() + test7.GetLength());
-    for (int i = 0; i < test8->GetLength(); i++) {
-        assert(test8->Get(i) == bc[i]);
-    }
-}
-
 void TestLinkedListInput()
 {
     int a[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
@@ -733,6 +722,20 @@ void TestLinkedListInput()
     LinkedList<int> test2(c, 8);
     test2.InsertAt(10, 3);
     assert(test2[3] == 10);
+}
+
+void TestLinkedListConcat()
+{
+    int b[] = { 1, 2, 3 };
+    int c[] = { 4, 5, 6 };
+    int bc[] = { 1, 2, 3, 4, 5, 6 };
+    LinkedList<int> test6(b, 3);
+    LinkedList<int> test7(c, 3);
+    LinkedList<int>* test8 = test6.Concat(test7);
+    assert(test8->GetLength() == test6.GetLength() + test7.GetLength());
+    for (int i = 0; i < test8->GetLength(); i++) {
+        assert(test8->Get(i) == bc[i]);
+    }
 }
 
 void TestArraySequenceConstuctors()
@@ -791,12 +794,39 @@ void TestArraySequenceInput()
     assert(test3.Get(3));
 }
 
+void TestArraySequenceConcat()
+{
+    int b[] = { 1, 2, 3 };
+    int c[] = { 4, 5, 6 };
+    int bc[] = { 1, 2, 3, 4, 5, 6 };
+    MutableArraySequence<int> test1(b, 3);
+    MutableArraySequence<int> test2(c, 3);
+    MutableArraySequence<int>* test3 = test1.Concat(test2);
+    assert(test3->GetLength() == test1.GetLength() + test2.GetLength());
+    for (int i = 0; i < test3->GetLength(); i++) {
+        assert(test3->Get(i) == bc[i]);
+    }
+}
+
+void TestArraySequenceGetSubSequence()
+{
+    int a[] = { 1, 2, 3, 4, 5, 6 };
+    int b[] = { 3, 4, 5 };
+    MutableArraySequence<int> test1(a, 6);
+    MutableArraySequence<int>* test2 = test1.GetSubSequence(3, 5);
+    assert(test2->GetLength());
+    for (int i = 0; i < test2->GetLength(); i++) {
+        assert(test2->Get(i) == b[i]);
+    }
+}
+
 int main(int argc, const char* argv[])
 {
     int status = 0;
     std::cout << "0. Run tests for DynamicArray\n";
     std::cout << "1. Run tests for LinkedList\n";
     std::cout << "2. Run tests for ArraySequence\n";
+    std::cout << "3. Run tests for LinkedSequence\n";
     std::cout << "4. Остановить программу\n";
 
     int flag = 1;
@@ -811,23 +841,32 @@ int main(int argc, const char* argv[])
         case 1:
             TestLinkedListConstructors();
             TestLinkedListInput();
-            TestLinkedListSubList();
             TestLinkedListConcat();
+            TestLinkedListSubList();
             std::cout << "Tests for LinkedList passed\n";
             break;
-        case 3:
+        case 2:
             TestArraySequenceConstuctors();
             TestArraySequenceInput();
+            TestArraySequenceConcat();
+            TestArraySequenceGetSubSequence();
+            std::cout << "Tests for ArraySequence passed\n";
+            break;
+        case 3:
+            break;
         case 4:
             flag = 0;
             break;
         default:
-            fprintf(stderr, "Неизвестная команда\n");
+            std::cout << "Неизвестная команда\n";
         }
         std::cout << "0. Run tests for DynamicArray\n";
         std::cout << "1. Run tests for LinkedList\n";
         std::cout << "2. Run tests for ArraySequence\n";
+        std::cout << "3. Run tests for LinkedSequence\n";
         std::cout << "3. Остановить программу\n";
     }
+    TestArraySequenceConcat();
+    TestArraySequenceGetSubSequence();
     return 0;
 }
