@@ -11,8 +11,8 @@ public:
     virtual int GetLength() = 0;
 
     virtual Sequence<T>* GetSubSequence(int startIndex, int endIndex) = 0;
-    virtual Sequence<T>* Append(T& item) = 0;
-    virtual Sequence<T>* Prepend(T& item) = 0;
+    virtual Sequence<T>* Append(const T& item) = 0;
+    virtual Sequence<T>* Prepend(const T& item) = 0;
     virtual Sequence<T>* InsertAt(const T& item, int index) = 0;
     virtual Sequence<T>* Concat(Sequence<T>& list) = 0;
     virtual T& operator[](int index) = 0;
@@ -85,7 +85,7 @@ public:
 
     T Get(int index)
     {
-        if (index < 0 || index >= size) {
+        if (index < 0 || index > size) {
             throw std::out_of_range("invalid argument");
         }
         return elements[index];
@@ -98,7 +98,7 @@ public:
 
     void Set(const T& value, int index)
     {
-        if (index < 0 || index >= size) {
+        if (index < 0 || index > size) {
             throw std::out_of_range("invalid argument");
         }
         Resize(size + 1);
@@ -189,7 +189,7 @@ public:
     }
     T GetLast() override
     {
-        return this->array->Get(this->array->GetSize() - 1);
+        return this->array->Get((this->array->GetSize()) - 1);
     }
     T Get(int index) override
     {
@@ -199,13 +199,13 @@ public:
     {
         return this->array->GetSize();
     }
-    ArraySequence<T>* Append(T& item) override // adding an element to the end of the array
+    ArraySequence<T>* Append(const T& item) override // adding an element to the end of the array
     {
         ArraySequence<T>* intermediateResult = GetInstance();
-        intermediateResult->array->Set(item, array->GetSize() - 1);
+        intermediateResult->array->Set(item, array->GetSize());
         return intermediateResult;
     }
-    ArraySequence<T>* Prepend(T& item) override // adding an element to the begining of the array
+    ArraySequence<T>* Prepend(const T& item) override // adding an element to the begining of the array
     {
         ArraySequence<T>* intermediateResult = GetInstance();
         intermediateResult->array->Set(item, 0);
@@ -735,7 +735,7 @@ void TestLinkedListInput()
     assert(test2[3] == 10);
 }
 
-void Test_ArraySequence_Constuctors()
+void TestArraySequenceConstuctors()
 {
 
     int a[] = { 1, 2, 3, 4, 5, 6 };
@@ -767,12 +767,36 @@ void Test_ArraySequence_Constuctors()
     }
 }
 
+void TestArraySequenceInput()
+{
+    int a[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    MutableArraySequence<int> test1(a, 8);
+    assert(test1.GetLength() == 8);
+    test1.Append(10);
+    assert(test1.GetLength() == 9);
+    assert(test1.GetLast() == 10);
+
+    int b[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    MutableArraySequence<int> test2(b, 8);
+    assert(test2.GetLength() == 8);
+    test2.Prepend(10);
+    assert(test2.GetLength() == 9);
+    assert(test2.GetFirst() == 10);
+
+    int c[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    MutableArraySequence<int> test3(c, 8);
+    assert(test3.GetLength() == 8);
+    test3.InsertAt(10, 3);
+    assert(test3.GetLength() == 9);
+    assert(test3.Get(3));
+}
+
 int main(int argc, const char* argv[])
 {
     int status = 0;
     std::cout << "0. Run tests for DynamicArray\n";
     std::cout << "1. Run tests for LinkedList\n";
-    std::cout << "3. Run tests for ArraySequence\n";
+    std::cout << "2. Run tests for ArraySequence\n";
     std::cout << "4. Остановить программу\n";
 
     int flag = 1;
@@ -792,7 +816,8 @@ int main(int argc, const char* argv[])
             std::cout << "Tests for LinkedList passed\n";
             break;
         case 3:
-            Test_ArraySequence_Constuctors();
+            TestArraySequenceConstuctors();
+            TestArraySequenceInput();
         case 4:
             flag = 0;
             break;
@@ -801,8 +826,8 @@ int main(int argc, const char* argv[])
         }
         std::cout << "0. Run tests for DynamicArray\n";
         std::cout << "1. Run tests for LinkedList\n";
+        std::cout << "2. Run tests for ArraySequence\n";
         std::cout << "3. Остановить программу\n";
     }
-    Test_ArraySequence_Constuctors();
     return 0;
 }
