@@ -10,10 +10,10 @@ public:
     virtual T Get(int index) = 0;
     virtual int GetLength() = 0;
 
-    virtual Sequence<T>* GetSubSequence(int startIndex, int endIndex);
+    virtual Sequence<T>* GetSubSequence(int startIndex, int endIndex) = 0;
     virtual Sequence<T>* Append(T& item) = 0;
     virtual Sequence<T>* Prepend(T& item) = 0;
-    virtual Sequence<T>* InsertAt(T& item, int index) = 0;
+    virtual Sequence<T>* InsertAt(const T& item, int index) = 0;
     virtual Sequence<T>* Concat(Sequence<T>& list) = 0;
     virtual T& operator[](int index) = 0;
 };
@@ -147,8 +147,8 @@ public:
 
 template <typename T>
 class ArraySequence : public Sequence<T> {
-private:
-    virtual ArraySequence<T>* Instance() = 0;
+protected:
+    virtual ArraySequence<T>* GetInstance() = 0;
     DynamicArray<T>* array;
 
 public:
@@ -165,6 +165,22 @@ public:
     {
         this->array = new DynamicArray<T>(items, count);
     }
+    ArraySequence(Sequence<T>& seq)
+    {
+        this->array = new DynamicArray<T>(seq.GetLength());
+        for (int i = 0; i < seq.GetLength(); i++) {
+            this->array->Set(seq.Get(i), i);
+            this->array->Resize(this->GetLength() - 1);
+        }
+    }
+    ArraySequence(ArraySequence<T>& seq)
+    {
+        this->array = new DynamicArray<T>(seq.GetLength());
+        for (int i = 0; i < seq.GetLength(); i++) {
+            this->array->Set(seq.Get(i), i);
+            this->array->Resize(this->GetLength() - 1);
+        }
+    }
 
     // methods
     T GetFirst() override
@@ -173,7 +189,7 @@ public:
     }
     T GetLast() override
     {
-        return this->array->Get(this->array->GetSize - 1);
+        return this->array->Get(this->array->GetSize() - 1);
     }
     T Get(int index) override
     {
@@ -183,26 +199,31 @@ public:
     {
         return this->array->GetSize();
     }
-    ArraySequence<T>* Append(T& item) // adding an element to the end of the array
+    ArraySequence<T>* Append(T& item) override // adding an element to the end of the array
     {
-        ArraySequence<T>* intermediateResult;
+        ArraySequence<T>* intermediateResult = GetInstance();
         intermediateResult->array->Set(item, array->GetSize() - 1);
         return intermediateResult;
     }
-    ArraySequence<T>* Prepend(T& item) // adding an element to the begining of the array
+    ArraySequence<T>* Prepend(T& item) override // adding an element to the begining of the array
     {
-        ArraySequence<T>* intermediateResult;
+        ArraySequence<T>* intermediateResult = GetInstance();
         intermediateResult->array->Set(item, 0);
         return intermediateResult;
     }
-    ArraySequence<T>* InsertAt(T& item, int index)
+    ArraySequence<T>* InsertAt(const T& item, int index) override
     {
-        ArraySequence<T>* intermediateResult;
+        ArraySequence<T>* intermediateResult = GetInstance();
         intermediateResult->array->Set(item, index);
         return intermediateResult;
     }
 
-    virtual ~ArraySequence()
+    T& operator[](int index) override
+    {
+        return (*(GetInstance()->array))[index];
+    }
+
+    virtual ~ArraySequence() override
     {
         delete array;
     }
@@ -211,31 +232,31 @@ public:
 template <typename T>
 class MutableArraySequence : public ArraySequence<T> {
 private:
-    ArraySequence<T>* Instance() override
+    ArraySequence<T>* GetInstance() override
     {
-        return *this;
+        return static_cast<ArraySequence<T>*>(this);
     }
 
 public:
     using ArraySequence<T>::ArraySequence;
 
-    MutableArraySequence<T>* Concat(ArraySequence<T>& list)
+    MutableArraySequence<T>* Concat(Sequence<T>& list) override
     {
-        MutableArraySequence<T>* intermediateResult = new MutableArraySequence(this->GetLength() + list->GetLength);
+        MutableArraySequence<T>* intermediateResult = new MutableArraySequence<T>(this->GetLength() + list.GetLength());
         for (int i = 0; i < this->GetLength(); i++) {
-            intermediateResult->Set(this->Get(i), i);
+            intermediateResult->InsertAt(this->Get(i), i);
         }
-        for (int i = 0; i < list->GetLength(); i++) {
-            intermediateResult->Set(list->Get(i), this->GetLength() + i);
+        for (int i = 0; i < list.GetLength(); i++) {
+            intermediateResult->InsertAt(list.Get(i), this->GetLength() + i);
         }
         return intermediateResult;
     }
 
-    MutableArraySequence<T>* GetSubsequence(int startIndex, int endIndex)
+    MutableArraySequence<T>* GetSubSequence(int startIndex, int endIndex) override
     {
         MutableArraySequence<T>* intermediateResult = new MutableArraySequence(endIndex - startIndex + 1);
         for (int i = 0; i < endIndex - startIndex + 1; i++) {
-            intermediateResult->Set(this->Get(startIndex + i), i);
+            intermediateResult->InsertAt(this->Get(startIndex + i), i);
         }
         return intermediateResult;
     }
@@ -244,7 +265,7 @@ public:
 template <typename T>
 class ImmutableArraySequence : public ArraySequence<T> {
 private:
-    ArraySequence<T>* Instance() override
+    ArraySequence<T>* GetInstance() override
     {
         ImmutableArraySequence<T>* result = new ImmutableArraySequence(this->GetLength());
         for (int i = 0; i < this->GetLength(); i++) {
@@ -263,7 +284,7 @@ public:
             intermediate->InsertAt(this->Get(i), i);
         }
         for (int i = 0; i < elements.GetLength(); i++) {
-            intermediate->IndertAt(elements.Get(i), i + this->GetLength());
+            intermediate->InsertAt(elements.Get(i), i + this->GetLength());
         }
         ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(intermediate->GetLength());
         for (int i = 0; i < intermediate->GetLength(); i++) {
@@ -278,7 +299,7 @@ public:
         if (startIndex < 0 || endIndex < startIndex || endIndex >= this->GetLength()) {
             throw std::invalid_argument("invalid argument");
         }
-        ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(&(*(this->data))[startIndex], endIndex - startIndex + 1);
+        ImmutableArraySequence<T>* result = new ImmutableArraySequence<T>(&(*(this->array))[startIndex], endIndex - startIndex + 1);
         return result;
     }
 };
@@ -714,12 +735,45 @@ void TestLinkedListInput()
     assert(test2[3] == 10);
 }
 
+void Test_ArraySequence_Constuctors()
+{
+
+    int a[] = { 1, 2, 3, 4, 5, 6 };
+    MutableArraySequence<int> testM1(6);
+    assert(testM1.GetLength() == 6);
+    ImmutableArraySequence<int> testIm1(6);
+    assert(testIm1.GetLength() == 6);
+
+    MutableArraySequence<int> testM2(a, 6);
+    assert(testM2.GetLength() == 6);
+    for (int i = 0; i < testM2.GetLength(); i++) {
+        assert(testM2.Get(i) == a[i]);
+    }
+    ImmutableArraySequence<int> testIm2(a, 6);
+    assert(testIm2.GetLength() == 6);
+    for (int i = 0; i < testIm2.GetLength(); i++) {
+        assert(testIm2.Get(i) == a[i]);
+    }
+
+    MutableArraySequence<int> testM3(testM2);
+    assert(testM3.GetLength() == testM2.GetLength());
+    for (int i = 0; i < testM3.GetLength(); i++) {
+        assert(testM3.Get(i) == testM2.Get(i));
+    }
+    ImmutableArraySequence<int> testIm3(testM2);
+    assert(testIm3.GetLength() == testM2.GetLength());
+    for (int i = 0; i < testIm3.GetLength(); i++) {
+        assert(testIm3.Get(i) == testM2.Get(i));
+    }
+}
+
 int main(int argc, const char* argv[])
 {
     int status = 0;
     std::cout << "0. Run tests for DynamicArray\n";
     std::cout << "1. Run tests for LinkedList\n";
-    std::cout << "3. Остановить программу\n";
+    std::cout << "3. Run tests for ArraySequence\n";
+    std::cout << "4. Остановить программу\n";
 
     int flag = 1;
     while (flag) {
@@ -738,6 +792,8 @@ int main(int argc, const char* argv[])
             std::cout << "Tests for LinkedList passed\n";
             break;
         case 3:
+            Test_ArraySequence_Constuctors();
+        case 4:
             flag = 0;
             break;
         default:
@@ -747,5 +803,6 @@ int main(int argc, const char* argv[])
         std::cout << "1. Run tests for LinkedList\n";
         std::cout << "3. Остановить программу\n";
     }
+    Test_ArraySequence_Constuctors();
     return 0;
 }
