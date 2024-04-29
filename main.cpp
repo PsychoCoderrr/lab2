@@ -262,18 +262,14 @@ public:
   Concat (Sequence<T> &list) override
   {
     MutableArraySequence<T> *intermediateResult
-        = new MutableArraySequence<T> (this->GetLength () + list.GetLength ());
+        = new MutableArraySequence<T> ();
     for (int i = 0; i < this->GetLength (); i++)
       {
-        intermediateResult->InsertAt (this->Get (i), i);
-        intermediateResult->array->Resize (intermediateResult->GetLength ()
-                                           - 1);
+          intermediateResult->Append (this->Get (i));
       }
     for (int i = 0; i < list.GetLength (); i++)
       {
-        intermediateResult->InsertAt (list.Get (i), this->GetLength () + i);
-        intermediateResult->array->Resize (intermediateResult->GetLength ()
-                                           - 1);
+          intermediateResult->Append (list.Get (i));
       }
     return intermediateResult;
   }
@@ -282,12 +278,10 @@ public:
   GetSubSequence (int startIndex, int endIndex) override
   {
     MutableArraySequence<T> *intermediateResult
-        = new MutableArraySequence (endIndex - startIndex + 1);
+        = new MutableArraySequence ();
     for (int i = 0; i < endIndex - startIndex + 1; i++)
       {
-        intermediateResult->InsertAt (this->Get (startIndex + i - 1), i);
-        intermediateResult->array->Resize (intermediateResult->GetLength ()
-                                           - 1);
+          intermediateResult->Append (this->Get (startIndex + i - 1));
       }
     return intermediateResult;
   }
@@ -314,21 +308,20 @@ public:
   ImmutableArraySequence<T> *
   Concat (Sequence<T> &elements) override
   {
-    MutableArraySequence<T> *intermediate = new MutableArraySequence<T> (
-        this->GetLength () + elements.GetLength ());
+    MutableArraySequence<T> *intermediate = new MutableArraySequence<T> ();
     for (int i = 0; i < this->GetLength (); i++)
       {
-        intermediate->InsertAt (this->Get (i), i);
+        intermediate->Append (this->Get (i));
       }
     for (int i = 0; i < elements.GetLength (); i++)
       {
-        intermediate->InsertAt (elements.Get (i), i + this->GetLength ());
+        intermediate->Append (elements.Get (i));
       }
     ImmutableArraySequence<T> *result
-        = new ImmutableArraySequence<T> (intermediate->GetLength ());
+        = new ImmutableArraySequence<T> ();
     for (int i = 0; i < intermediate->GetLength (); i++)
       {
-        result->InsertAt (intermediate->Get (i), i);
+        result->Append (intermediate->Get (i));
       }
     delete intermediate;
     return result;
