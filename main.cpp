@@ -604,7 +604,7 @@ public:
         }
         T* intermediate = new T[endIndex - startIndex + 1];
         for (int i = 0; i < endIndex - startIndex + 1; i++) {
-            intermediate[i] = this->Get(startIndex + i);
+            intermediate[i] = this->Get(startIndex + i - 1);
         }
         MutableListSequence<T>* result = new MutableListSequence<T>(intermediate, endIndex - startIndex + 1);
         delete[] intermediate;
@@ -878,6 +878,33 @@ void TestListInput()
     assert(test3.Get(3) == 10);
 }
 
+void TestListSequenceConcat()
+{
+    int b[] = { 1, 2, 3 };
+    int c[] = { 4, 5, 6 };
+    int bc[] = { 1, 2, 3, 4, 5, 6 };
+    MutableListSequence<int> test1(b, 3);
+    MutableListSequence<int> test2(c, 3);
+    MutableListSequence<int>* result = test1.Concat(test2);
+    assert(result->GetLength() == 6);
+    for (int i = 0; i < result->GetLength(); i++) {
+        assert(result->Get(i) == bc[i]);
+    }
+}
+
+void TestListSequenceGetSubSequence()
+{
+    int a[] = { 1, 2, 3, 4, 5, 6 };
+    int b[] = { 3, 4, 5 };
+    MutableListSequence<int> test1(a, 6);
+    MutableListSequence<int>* result = test1.GetSubSequence(3, 5);
+    assert(result->GetLength() == 3);
+    for (int i = 0; i < result->GetLength(); i++) {
+        std::cout << result->Get(i);
+        assert(result->Get(i) == b[i]);
+    }
+}
+
 int main(int argc, const char* argv[])
 {
     int status = 0;
@@ -913,6 +940,8 @@ int main(int argc, const char* argv[])
         case 3:
             TestListSequenceConstructors();
             TestListInput();
+            TestListSequenceConcat();
+            TestListSequenceGetSubSequence();
             break;
         case 4:
             flag = 0;
