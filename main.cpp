@@ -854,6 +854,30 @@ void TestListSequenceConstructors()
     }
 }
 
+void TestListInput()
+{
+    int a[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    MutableListSequence<int> test1(a, 8);
+    assert(test1.GetLength() == 8);
+    test1.Append(10);
+    assert(test1.GetLength() == 9);
+    assert(test1.GetLast() == 10);
+
+    int b[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    MutableListSequence<int> test2(b, 8);
+    assert(test2.GetLength() == 8);
+    test2.Prepend(10);
+    assert(test2.GetLength());
+    assert(test2.GetFirst() == 10);
+
+    int c[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    MutableListSequence<int> test3(c, 8);
+    assert(test3.GetLength() == 8);
+    test3.InsertAt(10, 3);
+    assert(test3.GetLength());
+    assert(test3.Get(3) == 10);
+}
+
 int main(int argc, const char* argv[])
 {
     int status = 0;
@@ -888,6 +912,7 @@ int main(int argc, const char* argv[])
             break;
         case 3:
             TestListSequenceConstructors();
+            TestListInput();
             break;
         case 4:
             flag = 0;
@@ -901,6 +926,5 @@ int main(int argc, const char* argv[])
         std::cout << "3. Run tests for LinkedSequence\n";
         std::cout << "4. Остановить программу\n";
     }
-    TestListSequenceConstructors();
     return 0;
 }
