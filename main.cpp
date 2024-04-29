@@ -1065,6 +1065,7 @@ main (int argc, const char *argv[])
           TestListInput ();
           TestListSequenceConcat ();
           TestListSequenceGetSubSequence ();
+          std::cout << "Tests for ArraySequence passed\n";
           break;
         case 4:
           flag = 0;
