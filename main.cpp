@@ -7,8 +7,8 @@ public:
     virtual ~Sequence() { }
     virtual T GetFirst() = 0;
     virtual T GetLast() = 0;
-    virtual T Get(int index) = 0;
-    virtual int GetLength() = 0;
+    virtual T Get(int index) const = 0;
+    virtual int GetLength() const = 0;
 
     virtual Sequence<T>* GetSubSequence(int startIndex, int endIndex) = 0;
     virtual Sequence<T>* Append(const T& item) = 0;
@@ -191,11 +191,11 @@ public:
     {
         return this->array->Get((this->array->GetSize()) - 1);
     }
-    T Get(int index) override
+    T Get(int index) const override
     {
         return this->array->Get(index);
     }
-    int GetLength() override
+    int GetLength() const override
     {
         return this->array->GetSize();
     }
@@ -489,15 +489,15 @@ public:
 };
 
 template <typename T>
-class ListSequence : public LinkedList<T> {
+class ListSequence : public Sequence<T> {
 protected:
     virtual ListSequence<T>* Instance() = 0;
-    LinkedList<T> list;
+    LinkedList<T>* list;
 
     ListSequence<T>* appendWithoutInstance(const T& item)
     {
         ListSequence<T>* result = this;
-        result->data->Append(item);
+        result->list->Append(item);
         return result;
     }
 
@@ -512,55 +512,59 @@ public:
     }
     ListSequence(const Sequence<T>& seq)
     {
-        this->data = new LinkedList<T>();
+        this->list = new LinkedList<T>();
         for (int i = 0; i < seq.GetLength(); i++) {
             appendWithoutInstance(seq.Get(i));
         }
     }
+
     ListSequence(const ListSequence<T>& seq)
     {
-        this->data = new LinkedList<T>();
+        this->list = new LinkedList<T>();
         for (int i = 0; i < seq.GetLength(); i++) {
             appendWithoutInstance(seq.Get(i));
         }
     }
 
-    T GetFirst()
+    T GetFirst() override
     {
-        return this->list->GetFirst;
+        return this->list->GetFirst();
     }
 
-    T GetLast()
+    T GetLast() override
     {
-        return this->list->GetLast;
+        return this->list->GetLast();
     }
 
-    T Get(int index)
+    T Get(int index) const override
     {
         return this->list->Get(index);
     }
 
-    int GetLength()
+    int GetLength() const override
     {
         return this->list->GetLength();
     }
 
     ListSequence<T>* Append(const T& item) override
     {
-        this->list->Append(item);
-        return this;
+        ListSequence<T>* result = Instance();
+        result->list->Append(item);
+        return result;
     }
 
     ListSequence<T>* Prepend(const T& item) override
     {
-        this->list->Prepend(item);
-        return this;
+        ListSequence<T>* result = Instance();
+        result->list->Prepend(item);
+        return result;
     }
 
     ListSequence<T>* InsertAt(const T& item, int index) override
     {
-        this->list->Append(item, index);
-        return this;
+        ListSequence<T>* result = Instance();
+        result->list->InsertAt(item, index);
+        return result;
     }
 
     T& operator[](int index) override
@@ -579,7 +583,7 @@ class MutableListSequence : public ListSequence<T> {
 private:
     ListSequence<T>* Instance() override
     {
-        return *this;
+        return static_cast<ListSequence<T>*>(this);
     }
 
 public:
@@ -611,13 +615,15 @@ public:
 template <typename T>
 class ImmutableListSequence : public ListSequence<T> {
 private:
-    LinkedList<T> Instance() override
+    ListSequence<T>* Instance() override
     {
         ImmutableListSequence<T>* result = new ImmutableListSequence<T>(*this);
         return result;
     }
 
 public:
+    using ListSequence<T>::ListSequence;
+
     ImmutableListSequence<T>* Concat(Sequence<T>& elements) override
     {
         MutableListSequence<T>* intermediate = new MutableListSequence<T>(static_cast<Sequence<T>&>(*this));
@@ -820,6 +826,34 @@ void TestArraySequenceGetSubSequence()
     }
 }
 
+void TestListSequenceConstructors()
+{
+    int a[] = { 1, 2, 3, 4, 5, 6, 7, 8 };
+    MutableListSequence<int> testM1(a, 8);
+    assert(testM1.GetLength() == 8);
+    for (int i = 0; i < testM1.GetLength(); i++) {
+        assert(testM1.Get(i) == a[i]);
+    }
+
+    ImmutableListSequence<int> testIm1(a, 8);
+    assert(testIm1.GetLength() == 8);
+    for (int i = 0; i < testIm1.GetLength(); i++) {
+        assert(testIm1.Get(i) == a[i]);
+    }
+
+    MutableListSequence<int> testM2(testM1);
+    assert(testM2.GetLength() == testM1.GetLength());
+    for (int i = 0; i < testM2.GetLength(); i++) {
+        assert(testM2.Get(i) == testM1.Get(i));
+    }
+
+    ImmutableListSequence<int> testIm2(testM1);
+    assert(testIm2.GetLength() == testM1.GetLength());
+    for (int i = 0; i < testIm2.GetLength(); i++) {
+        assert(testIm2.Get(i) == testM1.Get(i));
+    }
+}
+
 int main(int argc, const char* argv[])
 {
     int status = 0;
@@ -853,6 +887,7 @@ int main(int argc, const char* argv[])
             std::cout << "Tests for ArraySequence passed\n";
             break;
         case 3:
+            TestListSequenceConstructors();
             break;
         case 4:
             flag = 0;
@@ -864,9 +899,8 @@ int main(int argc, const char* argv[])
         std::cout << "1. Run tests for LinkedList\n";
         std::cout << "2. Run tests for ArraySequence\n";
         std::cout << "3. Run tests for LinkedSequence\n";
-        std::cout << "3. Остановить программу\n";
+        std::cout << "4. Остановить программу\n";
     }
-    TestArraySequenceConcat();
-    TestArraySequenceGetSubSequence();
+    TestListSequenceConstructors();
     return 0;
 }
