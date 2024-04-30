@@ -11,8 +11,8 @@ main ()
   std::cout << "0. Run tests for DynamicArray\n";
   std::cout << "1. Run tests for LinkedList\n";
   std::cout << "2. Run tests for ArraySequence\n";
-  std::cout << "3. Run tests for LinkedSequence\n";
-  std::cout << "4. Остановить программу\n";
+  std::cout << "3. Run tests for ListSequence\n";
+  std::cout << "4. Stop programm\n";
 
   int flag = 1;
   while (flag)
@@ -55,8 +55,8 @@ main ()
       std::cout << "0. Run tests for DynamicArray\n";
       std::cout << "1. Run tests for LinkedList\n";
       std::cout << "2. Run tests for ArraySequence\n";
-      std::cout << "3. Run tests for LinkedSequence\n";
-      std::cout << "4. Остановить программу\n";
+      std::cout << "3. Run tests for ListSequence\n";
+      std::cout << "4. Stop programm\n";
     }
   return 0;
 }
