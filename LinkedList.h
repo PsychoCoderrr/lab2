@@ -49,6 +49,7 @@ public:
         for (int i = 0; i < this->size; i++)
           {
             buf = current->next;
+            delete current;
             current = buf;
           }
         delete current;
