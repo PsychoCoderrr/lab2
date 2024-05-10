@@ -105,7 +105,7 @@ template <typename T> class DynamicArray
             delete[] elements;
             elements = nullptr;
         }
-        if (newSize > capacity)
+        if (newSize >= capacity)
         {
             Reserve(newSize * 2);
         }
