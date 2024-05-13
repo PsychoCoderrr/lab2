@@ -2,13 +2,13 @@
 #include "ArraySequence.h"
 #include "ListSequence.h"
 
-template <typename InputType, typename OutputType, typename... Types>
-Sequence<OutputType> &map(const Sequence<InputType> &seq, OutputType (*func)(InputType, Types &...), Types &...tail)
+template <typename InputType, typename OutputType>
+Sequence<OutputType> &map(const Sequence<InputType> &seq, OutputType (*func)(InputType))
 {
     MutableArraySequence<OutputType> *result = new MutableArraySequence<OutputType>(seq.GetLength());
     for (int i = 0; i < seq.GetLength(); i++)
     {
-        (*result)[i] = (*func)(seq.Get(i), tail...);
+        (*result)[i] = (*func)(seq.Get(i));
     }
     return *result;
 }
