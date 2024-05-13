@@ -52,6 +52,7 @@ int main()
             TestMapFunc();
             TestReduceFunc();
             TestWhereFunc();
+            TestMapFuncComplex();
             std::cout << "Tests for MapWhereReduce functions passed\n";
             break;
         case 5:

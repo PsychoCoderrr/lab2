@@ -7,6 +7,7 @@
 #include "Sequence.h"
 #include "assert.h"
 #include "iostream"
+#include "Complex.h"
 
 void TestDynamicArrayConstructors()
 {
@@ -286,6 +287,11 @@ int TestMapFunc(int i)
     return i * i;
 }
 
+complex TestMapFuncComplex(complex i)
+{
+    return i*i;
+}
+
 int TestReduceFunc(int a, int b)
 {
     return a + b;
@@ -330,6 +336,19 @@ void TestWhereFunc()
     int b[] = {2, 4, 6, 8};
     MutableListSequence<int> test1(a, 8);
     MutableArraySequence<int> testRes = where(test1, &isEven);
+    assert(testRes.GetLength() == 4);
+    for (int i = 0; i < testRes.GetLength(); i++)
+    {
+        assert(testRes.Get(i) == b[i]);
+    }
+}
+
+void TestMapFuncComplex()
+{
+    complex a[] = {{1,2}, {2, 3}, {3, 4}, {4, 5}};
+    complex b[] = {{-3, 4}, {-5, 12}, {-7, 24}, {-9, 40}};
+    MutableListSequence<complex> test1(a, 4);
+    MutableArraySequence<complex> testRes = map(test1, &TestMapFuncComplex);
     assert(testRes.GetLength() == 4);
     for (int i = 0; i < testRes.GetLength(); i++)
     {
